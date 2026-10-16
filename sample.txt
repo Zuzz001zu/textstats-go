@@ -1,0 +1,4 @@
+Git is a version control system.
+GitHub is a service for hosting Git repositories.
+Go is a simple language for building fast command-line tools.
+A good CLI turns an API into commands people can automate.
