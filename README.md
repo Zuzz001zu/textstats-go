@@ -5,7 +5,7 @@
 A small command-line tool written in Go that prints statistics about a text file:
 line, word and character counts, and the most frequent words.
 
-Built with the Go standard library only — no external dependencies.
+Built with the Go standard library only - no external dependencies.
 
 ## Features
 
