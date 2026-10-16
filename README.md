@@ -9,8 +9,8 @@ Built with the Go standard library only — no external dependencies.
 
 ## Features
 
-- `count` — lines, words and characters (Unicode-aware)
-- `top` — the N most frequent words, with stable ordering
+- `count` - lines, words and characters (Unicode-aware)
+- `top` - the N most frequent words, with stable ordering
 - `--json` output for scripts and automation
 - Reads from a file or from standard input (`-`)
 - Clear error messages and exit codes (`0` OK, `1` runtime error, `2` usage error)
