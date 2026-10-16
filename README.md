@@ -11,6 +11,7 @@ Built with the Go standard library only — no external dependencies.
 
 - `count` — lines, words and characters (Unicode-aware)
 - `top` — the N most frequent words, with stable ordering
+- `--json` output for scripts and automation
 - Reads from a file or from standard input (`-`)
 - Clear error messages and exit codes (`0` OK, `1` runtime error, `2` usage error)
 - Unit and CLI tests, CI on Linux, Windows and macOS
@@ -51,6 +52,20 @@ textstats top -n 3 testdata/sample.txt
 a               4
 is              3
 for             2
+```
+
+JSON output:
+
+```bash
+textstats count testdata/sample.txt --json
+```
+
+```json
+{
+  "lines": 4,
+  "words": 36,
+  "chars": 200
+}
 ```
 
 Read from standard input:

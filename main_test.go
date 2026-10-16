@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -22,6 +23,37 @@ func TestCountText(t *testing.T) {
 	want := "Lines: 2\nWords: 4\nChars: 19\n"
 	if out != want {
 		t.Errorf("output = %q, want %q", out, want)
+	}
+}
+
+func TestCountJSON(t *testing.T) {
+	out, _, code := runCLI(t, "a b c", "count", "-", "--json")
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0", code)
+	}
+	var got struct{ Lines, Words, Chars int }
+	if err := json.Unmarshal([]byte(out), &got); err != nil {
+		t.Fatalf("output is not valid JSON: %v\n%s", err, out)
+	}
+	if got.Lines != 1 || got.Words != 3 || got.Chars != 5 {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestTopJSON(t *testing.T) {
+	out, _, code := runCLI(t, "go go cli", "top", "--json", "-n", "1", "-")
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0", code)
+	}
+	var got []struct {
+		Word  string
+		Count int
+	}
+	if err := json.Unmarshal([]byte(out), &got); err != nil {
+		t.Fatalf("output is not valid JSON: %v\n%s", err, out)
+	}
+	if len(got) != 1 || got[0].Word != "go" || got[0].Count != 2 {
+		t.Errorf("got %+v", got)
 	}
 }
 

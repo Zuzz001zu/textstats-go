@@ -2,14 +2,15 @@
 //
 // Usage:
 //
-//	textstats count <file>
-//	textstats top [-n 5] <file>
+//	textstats count <file> [--json]
+//	textstats top [-n 5] <file> [--json]
 //	textstats version
 //
 // Use "-" as the file name to read from standard input.
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -19,14 +20,14 @@ import (
 	"github.com/Zuzz001zu/textstats-go/internal/stats"
 )
 
-const version = "1.0.0"
+const version = "1.1.0"
 
 const usage = `textstats - text statistics from the command line
 
 Usage:
-  textstats count <file>         count lines, words and characters
-  textstats top [-n N] <file>    show the N most frequent words (default 5)
-  textstats version              print the version
+  textstats count <file> [--json]       count lines, words and characters
+  textstats top [-n N] <file> [--json]  show the N most frequent words (default 5)
+  textstats version                     print the version
 
 Use "-" as <file> to read from standard input.
 `
@@ -63,12 +64,16 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 func runCount(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("count", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+	asJSON := fs.Bool("json", false, "print the result as JSON")
 	text, code := parseAndRead(fs, args, stdin, stderr)
 	if code != 0 {
 		return code
 	}
 
 	s := stats.Analyze(text)
+	if *asJSON {
+		return printJSON(stdout, stderr, s)
+	}
 	fmt.Fprintf(stdout, "Lines: %d\nWords: %d\nChars: %d\n", s.Lines, s.Words, s.Chars)
 	return 0
 }
@@ -77,6 +82,7 @@ func runTop(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("top", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	n := fs.Int("n", 5, "number of words to show")
+	asJSON := fs.Bool("json", false, "print the result as JSON")
 	text, code := parseAndRead(fs, args, stdin, stderr)
 	if code != 0 {
 		return code
@@ -86,7 +92,11 @@ func runTop(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 2
 	}
 
-	for _, wc := range stats.Top(text, *n) {
+	top := stats.Top(text, *n)
+	if *asJSON {
+		return printJSON(stdout, stderr, top)
+	}
+	for _, wc := range top {
 		fmt.Fprintf(stdout, "%-15s %d\n", wc.Word, wc.Count)
 	}
 	return 0
@@ -131,4 +141,14 @@ func readInput(name string, stdin io.Reader) (string, error) {
 		return "", fmt.Errorf("file not found: %s", name)
 	}
 	return string(data), err
+}
+
+func printJSON(stdout, stderr io.Writer, v any) int {
+	enc := json.NewEncoder(stdout)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(v); err != nil {
+		fmt.Fprintln(stderr, "error:", err)
+		return 1
+	}
+	return 0
 }
