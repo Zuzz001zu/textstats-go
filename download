@@ -1,0 +1,15 @@
+# Binaries
+/textstats
+/textstats.exe
+*.exe
+dist/
+
+# Test and coverage output
+*.out
+coverage.html
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
